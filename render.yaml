@@ -1,0 +1,34 @@
+services:
+  # Backend FastAPI Web Service
+  - type: web
+    name: lyftr-llm-backend
+    runtime: docker
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    plan: free
+    region: oregon
+    envVars:
+      - key: LLM_API_KEYS
+        sync: false
+      - key: DATABASE_URL
+        value: sqlite:////data/app.db
+      - key: ALLOWED_ORIGINS
+        value: "*"
+      - key: ENABLE_FAILURE_SIMULATION
+        value: "true"
+      - key: DEFAULT_MODEL
+        value: gemini/gemini-2.0-flash
+    disk:
+      name: lyftr-sqlite-data
+      mountPath: /data
+      sizeGB: 1
+
+  # Frontend React Static Site
+  - type: web
+    name: lyftr-llm-frontend
+    runtime: static
+    buildCommand: cd frontend && npm install && npm run build
+    staticPublishPath: ./frontend/dist
+    envVars:
+      - key: VITE_BACKEND_URL
+        sync: false
